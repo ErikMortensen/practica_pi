@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes, BOOLEAN } = require("sequelize");
 
 module.exports = (sequelize) => {
     sequelize.define('User', {
@@ -18,6 +18,11 @@ module.exports = (sequelize) => {
         phone: {
             type: DataTypes.STRING,
             allowNull: false
+        },
+        created: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: true
         }
     }, { timestamps: false });
 };

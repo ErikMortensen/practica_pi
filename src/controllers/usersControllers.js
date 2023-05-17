@@ -1,10 +1,30 @@
 const axios = require('axios');
+const { Op } = require('sequelize');
 const { User } = require('../db');
 
 const createUser = async (name, email, phone) => await User.create({ name, email, phone });
 
-const searchUserByName = () => {
+const searchUserByName = async (name) => {
+    const databaseUsers = await User.findAll({
+        where: {
+            name: {
+                [Op.iLike]: `%${name}%`,
+            }
+        }
+    })
+    //Busca coincidencia exacta
+    // const databaseUsers = await User.findAll({
+    //     where: {
+    //         name: name
+    //     }
+    // })
 
+    const apiUsers = (await axios.get(`https://jsonplaceholder.typicode.com/users`)).data;
+    // const apiUsersByName = apiUsers.filter(user => user.name === name); // cusca coincidencia exacta
+    const apiUsersByName = apiUsers.filter(user => user.name.toLowerCase().includes(name.toLowerCase()));
+    const apiUsersClean = cleanArray(apiUsersByName);
+
+    return [...databaseUsers, ...apiUsersClean];
 }
 
 const cleanArray = (arr) =>
@@ -14,7 +34,8 @@ const cleanArray = (arr) =>
             id: element.id,
             name: element.name,
             email: element.email,
-            phone: element.phone
+            phone: element.phone,
+            created: false
         }
     });
 
@@ -34,7 +55,7 @@ const getUserById = async (id, source) => {
         ? await User.findByPk(id)
         : (await axios.get(`https://jsonplaceholder.typicode.com/users/${id}`)).data;
 
-    return user;
+    return cleanArray([user]);
 }
 
 
