@@ -1,9 +1,14 @@
-const { createUser, findUsers, findUserById } = require("../controllers/usersControllers");
+const { createUser, getUserById, searchUserByName, getAllUsers } = require("../controllers/usersControllers");
 
 const getUsersHandler = async (req, res) => {
+    const { name } = req.query;
+
     try {
-        const users = await findUsers();
-        res.status(200).send(users);
+        const results = name
+            ? await searchUserByName(name)
+            : await getAllUsers();
+
+        res.status(200).send(results);
     } catch (error) {
         res.status(400).send({ error: error.message });
     }
@@ -11,13 +16,14 @@ const getUsersHandler = async (req, res) => {
 
 const getUserHandler = async (req, res) => {
     const { id } = req.params;
+    const source = isNaN(id) ? 'bdd' : 'api';
+
     try {
-        const user = await findUserById(id);
+        const user = await getUserById(id, source);
         res.status(200).send(user);
     } catch ({ message }) {
         res.status(400).send({ error: message });
     }
-    const user = findUserById(id);
 };
 
 const createUserHandler = async (req, res) => {
