@@ -22,9 +22,9 @@ const cleanArray = (arr) =>
 const getAllUsers = async () => {
     const databaseUsers = await User.findAll();
 
-    const apiUsers = (await axios.get(`https://jsonplaceholder.typicode.com/users`)).data;
+    const apiUsersRaw = (await axios.get(`https://jsonplaceholder.typicode.com/users`)).data;
 
-    apiUsers = cleanArray(apiUsers);
+    const apiUsers = cleanArray(apiUsersRaw);
 
     return [...databaseUsers, ...apiUsers];
 }
