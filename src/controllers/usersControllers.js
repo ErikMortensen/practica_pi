@@ -1,6 +1,6 @@
 const axios = require('axios');
 const { Op } = require('sequelize');
-const { User } = require('../db');
+const { User, Post } = require('../db');
 
 const createUser = async (name, email, phone) => await User.create({ name, email, phone });
 
@@ -39,6 +39,17 @@ const cleanArray = (arr) =>
         }
     });
 
+const cleanObj = (obj) => {
+
+    return {
+        id: obj.id,
+        name: obj.name,
+        email: obj.email,
+        phone: obj.phone,
+        created: false
+    };
+}
+
 
 const getAllUsers = async () => {
     const databaseUsers = await User.findAll();
@@ -51,11 +62,15 @@ const getAllUsers = async () => {
 }
 
 const getUserById = async (id, source) => {
-    const user = source === 'bdd'
-        ? await User.findByPk(id)
-        : (await axios.get(`https://jsonplaceholder.typicode.com/users/${id}`)).data;
-
-    return cleanArray([user]);
+    const user = source === 'api'
+        ? cleanObj((await axios.get(`https://jsonplaceholder.typicode.com/users/${id}`)).data)
+        : await User.findByPk(id, {
+            include: {
+                model: Post,
+                attributes: ["title", "body"]
+            }
+        });
+    return user;
 }
 
 
